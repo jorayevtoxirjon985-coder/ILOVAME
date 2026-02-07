@@ -21,7 +21,30 @@ dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
 
 # --------------------------------------------------------------------------------
-# 2. PROMPTLAR (MATNLAR)
+# 2. FAYL IDLARI (MANA SHU YERGA IDLARNI YOZING)
+# --------------------------------------------------------------------------------
+# Siz botga fayl tashlab olgan ID larni shu yerga qo'ying.
+# Agar ID bo'sh tursa (""), bot avtomatik ssilka beradi.
+FILE_IDS = {
+    "capcut": "",       # Masalan: "BQACAgIAAxkBAAI..."
+    "inshot": "",
+    "instagram": "",
+    "spotify": "",
+    "tiktok": "",
+    "vpn": "",
+    "nomer_apk": "",
+    "diskdigger": "",
+    "clash": "",
+    "wamr": "",
+    "instander": "",
+    "fake_call": "",
+    "call_recorder": "",
+    "lock_app": "",
+    "aka_messenger": "",
+}
+
+# --------------------------------------------------------------------------------
+# 3. PROMPTLAR (MATNLAR)
 # --------------------------------------------------------------------------------
 portrait_prompts = [
     "Create a realistic behind-the-scenes selfie on a film set inspired by the HBO series Game of Thrones...",
@@ -32,15 +55,26 @@ portrait_prompts = [
 ]
 
 # --------------------------------------------------------------------------------
-# 3. YORDAMCHI: SSILKA TUGMASINI YASASH
+# 4. YORDAMCHI FUNKSIYALAR
 # --------------------------------------------------------------------------------
 def link_btn(text, url):
     kb = InlineKeyboardBuilder()
     kb.button(text=f"📥 {text}ni yuklab olish", url=url)
     return kb.as_markup()
 
+async def send_file_or_link(message, file_key, caption, link_text, link_url):
+    """
+    Agar ID bor bo'lsa fayl tashlaydi, yo'q bo'lsa ssilka beradi.
+    """
+    file_id = FILE_IDS.get(file_key)
+    if file_id and len(file_id) > 10: # ID borligini tekshirish
+        await message.answer_document(document=file_id, caption=caption)
+    else:
+        # ID yo'q bo'lsa ssilka
+        await message.answer(f"{caption}\n\n(Fayl topilmadi, ssilka orqali yuklang):", reply_markup=link_btn(link_text, link_url))
+
 # --------------------------------------------------------------------------------
-# 4. MENYULAR
+# 5. MENYULAR
 # --------------------------------------------------------------------------------
 def main_menu():
     builder = ReplyKeyboardBuilder()
@@ -89,7 +123,16 @@ def second_menu():
     return builder.as_markup(resize_keyboard=True)
 
 # --------------------------------------------------------------------------------
-# 5. HANDLERLAR (JAVOBLAR)
+# 6. ID OLISH FUNKSIYASI (SIZ UCHUN)
+# --------------------------------------------------------------------------------
+@dp.message(F.document)
+async def get_file_id_handler(message: types.Message):
+    # Fayl tashlasangiz ID sini beradi
+    file_id = message.document.file_id
+    await message.reply(f"✅ **Fayl ID:**\n<code>{file_id}</code>\n\nNusxalab oling va kodga qo'ying!", parse_mode="HTML")
+
+# --------------------------------------------------------------------------------
+# 7. HANDLERLAR (JAVOBLAR)
 # --------------------------------------------------------------------------------
 
 @dp.message(Command("start"))
@@ -104,15 +147,14 @@ async def next_page(message: types.Message):
 async def prev_page(message: types.Message):
     await message.answer("Asosiy menyu:", reply_markup=main_menu())
 
-# --- 1-MENYU TUGMALARI (Ssilka orqali) ---
+# --- 1-MENYU TUGMALARI ---
 
 @dp.message(F.text == "Montaj ilovalari 📹")
 async def send_montage(message: types.Message):
-    kb = InlineKeyboardBuilder()
-    # Play Marketdagi rasmiy ssilkalar
-    kb.button(text="📥 CapCut (Play Market)", url="https://play.google.com/store/apps/details?id=com.lemon.lvoverseas")
-    kb.button(text="📥 InShot (Play Market)", url="https://play.google.com/store/apps/details?id=com.camerasideas.instashot")
-    await message.answer("Montaj uchun eng zo'r ilovalar:", reply_markup=kb.as_markup())
+    # CapCut
+    await send_file_or_link(message, "capcut", "📥 **CapCut Pro** (Android)", "CapCut", "https://play.google.com/store/apps/details?id=com.lemon.lvoverseas")
+    # InShot
+    await send_file_or_link(message, "inshot", "📥 **InShot Pro** (Android)", "InShot", "https://play.google.com/store/apps/details?id=com.camerasideas.instashot")
 
 @dp.message(F.text == "ChatGPT portret 🌅")
 async def send_prompt(message: types.Message):
@@ -121,42 +163,36 @@ async def send_prompt(message: types.Message):
 
 @dp.message(F.text == "Instagram Mod")
 async def h_insta(message: types.Message):
-    # Instander (Eng yaxshi mod sayti)
-    await message.answer("Instagram Mod (Instander) ni yuklab olish:", reply_markup=link_btn("Instander Sayti", "https://thedise.me/instander/"))
+    await send_file_or_link(message, "instagram", "📥 **Instagram Mod** (Instander)", "Instander", "https://thedise.me/instander/")
 
 @dp.message(F.text == "Spotify Mod 🎵")
 async def h_spotify(message: types.Message):
-    # XManager (Spotify mod menejeri)
-    await message.answer("Spotify Mod (XManager) ni yuklab olish:", reply_markup=link_btn("XManager Sayti", "https://xmanagerapp.com/"))
+    await send_file_or_link(message, "spotify", "📥 **Spotify Premium**", "Spotify Mod", "https://xmanagerapp.com/")
 
 @dp.message(F.text == "TikTok Mod 📹")
 async def h_tiktok(message: types.Message):
-    # Telegramdagi TikTok mod kanali
-    await message.answer("TikTok Mod (Plugin) yuklab olish:", reply_markup=link_btn("TikTok Mod Kanal", "https://t.me/tiktokmod_cloud"))
+    await send_file_or_link(message, "tiktok", "📥 **TikTok Mod** (Suv belgisiz)", "TikTok Mod", "https://t.me/tiktokmod_cloud")
 
 @dp.message(F.text == "InShot Pro ✂️")
 async def h_inshot(message: types.Message):
-    await message.answer("InShot yuklab olish:", reply_markup=link_btn("InShot (Play Market)", "https://play.google.com/store/apps/details?id=com.camerasideas.instashot"))
+    await send_file_or_link(message, "inshot", "📥 **InShot Pro**", "InShot Pro", "https://play.google.com/store/apps/details?id=com.camerasideas.instashot")
 
 @dp.message(F.text == "VPN Pro versiya 🌐")
 async def h_vpn(message: types.Message):
-    await message.answer("AdGuard VPN (Tezkor va xavfsiz):", reply_markup=link_btn("AdGuard VPN", "https://adguard-vpn.com/en/welcome.html"))
+    await send_file_or_link(message, "vpn", "📥 **AdGuard VPN**", "VPN", "https://adguard-vpn.com/en/welcome.html")
 
 @dp.message(F.text == "Nomer aniqlash 🔍")
 async def h_nomer(message: types.Message):
-    kb = InlineKeyboardBuilder()
-    kb.button(text="🤖 Android uchun", url="https://play.google.com/store/apps/details?id=com.syncme.syncmeapp")
-    kb.button(text="📱 iPhone uchun", url="https://apps.apple.com/uz/app/sync-me-caller-id-contacts/id340787494")
-    await message.answer("Nomer aniqlash ilovasi (Sync.ME):", reply_markup=kb.as_markup())
+    await send_file_or_link(message, "nomer_apk", "🤖 **Android uchun: Sync.ME**", "Android App", "https://play.google.com/store/apps/details?id=com.syncme.syncmeapp")
+    await message.answer("📱 **iPhone uchun:**\nhttps://apps.apple.com/uz/app/sync-me-caller-id-contacts/id340787494")
 
 @dp.message(F.text == "Rasmlarni tiklash ♻️")
 async def h_recover(message: types.Message):
-    await message.answer("DiskDigger (Rasmlarni tiklash):", reply_markup=link_btn("DiskDigger", "https://play.google.com/store/apps/details?id=com.defianttech.diskdigger"))
+    await send_file_or_link(message, "diskdigger", "📥 **DiskDigger Pro**", "DiskDigger", "https://play.google.com/store/apps/details?id=com.defianttech.diskdigger")
 
 @dp.message(F.text == "Mod O'yinlar 🎮")
 async def h_games(message: types.Message):
-    # HappyMod sayti (Mod o'yinlar bazasi)
-    await message.answer("Clash of Clans va boshqa mod o'yinlar:", reply_markup=link_btn("HappyMod Sayti", "https://happymod.com/"))
+    await send_file_or_link(message, "clash", "📥 **Clash of Clans Mod**", "HappyMod", "https://happymod.com/")
 
 # --- 2-MENYU TUGMALARI ---
 
@@ -183,7 +219,7 @@ async def h_ai_video(message: types.Message):
 
 @dp.message(F.text.in_({"Android sirli ilovasi 🤫", "O'chgan smsni ko'rish 👀"}))
 async def h_wamr(message: types.Message):
-    await message.answer("WAMR (O'chgan SMSlarni o'qish):", reply_markup=link_btn("WAMR (Play Market)", "https://play.google.com/store/apps/details?id=com.drilens.wamr"))
+    await send_file_or_link(message, "wamr", "📥 **WAMR** (O'chgan SMSlarni o'qish)", "WAMR", "https://play.google.com/store/apps/details?id=com.drilens.wamr")
 
 @dp.message(F.text == "PUL ISHLASH 🤑")
 async def h_earn_money(message: types.Message):
@@ -191,15 +227,15 @@ async def h_earn_money(message: types.Message):
 
 @dp.message(F.text == "Sharpa Telegram 👻")
 async def h_ghost(message: types.Message):
-    await message.answer("Aka Messenger (Sharpa rejim):", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=org.aka.messenger"))
+    await send_file_or_link(message, "aka_messenger", "📥 **Aka Messenger** (Sharpa rejim)", "Aka Messenger", "https://play.google.com/store/apps/details?id=org.aka.messenger")
 
 @dp.message(F.text == "Android VPN 🌐")
 async def h_android_vpn(message: types.Message):
-    await message.answer("AdGuard VPN:", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=com.adguard.vpn"))
+    await send_file_or_link(message, "vpn", "📥 **AdGuard VPN**", "VPN", "https://play.google.com/store/apps/details?id=com.adguard.vpn")
 
 @dp.message(F.text == "Cap Cut Pro tekin 📱")
 async def h_capcut_free(message: types.Message):
-    await message.answer("CapCut (So'nggi versiya):", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=com.lemon.lvoverseas"))
+    await send_file_or_link(message, "capcut", "📥 **CapCut Pro**", "CapCut", "https://play.google.com/store/apps/details?id=com.lemon.lvoverseas")
 
 @dp.message(F.text == "Minusovka ajratish 🎼")
 async def h_moises(message: types.Message):
@@ -223,19 +259,19 @@ async def h_anydesk(message: types.Message):
 
 @dp.message(F.text.in_({"Bir daqiqalik parol ✳️", "Telefon blok ilovasi 🔒"}))
 async def h_lock(message: types.Message):
-    await message.answer("Screen Lock Time Password:", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=com.miragestacks.screenlock.timepassword"))
+    await send_file_or_link(message, "lock_app", "📥 **Time Password**", "Screen Lock", "https://play.google.com/store/apps/details?id=com.miragestacks.screenlock.timepassword")
 
 @dp.message(F.text == "Telefon Zapis 🔴")
 async def h_recorder(message: types.Message):
-    await message.answer("Call Recorder:", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=com.catalinagroup.callrecorder"))
+    await send_file_or_link(message, "call_recorder", "📥 **Call Recorder**", "Call Recorder", "https://play.google.com/store/apps/details?id=com.catalinagroup.callrecorder")
 
 @dp.message(F.text == "Yolg'on qo'ng'iroq 📞")
 async def h_fake_call(message: types.Message):
-    await message.answer("Fake Call (Prank):", reply_markup=link_btn("Yuklab olish", "https://play.google.com/store/apps/details?id=com.fungame.fakecall.prankfriend"))
+    await send_file_or_link(message, "fake_call", "📥 **Fake Call**", "Fake Call", "https://play.google.com/store/apps/details?id=com.fungame.fakecall.prankfriend")
 
 @dp.message(F.text == "Reklamasiz Instagram ❗️")
 async def h_instander(message: types.Message):
-    await message.answer("Instander (Reklamasiz Instagram):", reply_markup=link_btn("Yuklab olish", "https://thedise.me/instander/"))
+    await send_file_or_link(message, "instander", "📥 **Instander**", "Instander", "https://thedise.me/instander/")
 
 @dp.message(F.text == "O'yin uchun ilova 🎮")
 async def h_airconsole(message: types.Message):
