@@ -32,7 +32,7 @@ portrait_prompts = [
 ]
 
 # --------------------------------------------------------------------------------
-# 3. YORDAMCHI: TUGMA YASOVCHI
+# 3. YORDAMCHI: SSILKA TUGMASINI YASASH
 # --------------------------------------------------------------------------------
 def link_btn(text, url):
     kb = InlineKeyboardBuilder()
@@ -40,7 +40,7 @@ def link_btn(text, url):
     return kb.as_markup()
 
 # --------------------------------------------------------------------------------
-# 4. MENYULAR
+# 4. ASOSIY MENYULAR (TUGMALAR)
 # --------------------------------------------------------------------------------
 def main_menu():
     builder = ReplyKeyboardBuilder()
@@ -94,7 +94,7 @@ def second_menu():
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Assalomu alaykum! Ilovame botiga xush kelibsiz.", reply_markup=main_menu())
+    await message.answer("Assalomu alaykum! Ilovame botiga xush kelibsiz.\nKerakli bo'limni tanlang:", reply_markup=main_menu())
 
 @dp.message(F.text == "Keyingi qator ➡️")
 async def next_page(message: types.Message):
@@ -104,15 +104,14 @@ async def next_page(message: types.Message):
 async def prev_page(message: types.Message):
     await message.answer("Asosiy menyu:", reply_markup=main_menu())
 
-# --- 1-MENYU TUGMALARI (Ssilka orqali) ---
+# --- 1-MENYU TUGMALARI (PLAY MARKETGA YO'NALTIRISH) ---
 
 @dp.message(F.text == "Montaj ilovalari 📹")
 async def send_montage(message: types.Message):
-    # CapCut va InShotga ssilka beramiz
     kb = InlineKeyboardBuilder()
     kb.button(text="📥 CapCut (Play Market)", url="https://play.google.com/store/apps/details?id=com.lemon.lvoverseas")
     kb.button(text="📥 InShot (Play Market)", url="https://play.google.com/store/apps/details?id=com.camerasideas.instashot")
-    await message.answer("Montaj uchun ilovalarni yuklab oling:", reply_markup=kb.as_markup())
+    await message.answer("Montaj uchun eng zo'r ilovalar (Rasmiy):", reply_markup=kb.as_markup())
 
 @dp.message(F.text == "ChatGPT portret 🌅")
 async def send_prompt(message: types.Message):
@@ -121,21 +120,20 @@ async def send_prompt(message: types.Message):
 
 @dp.message(F.text == "Instagram Mod")
 async def h_insta(message: types.Message):
-    # Instander saytiga yo'naltiramiz
-    await message.answer("Instagram Mod (Instander) ni yuklab olish:", reply_markup=link_btn("Instander", "https://thedise.me/instander/"))
+    # Instander (Eng ishonchli mod sayti)
+    await message.answer("Instagram Mod (Instander) ni yuklab olish:", reply_markup=link_btn("Instander Sayti", "https://thedise.me/instander/"))
 
 @dp.message(F.text == "Spotify Mod 🎵")
 async def h_spotify(message: types.Message):
-    # Spotify XManager
-    await message.answer("Spotify Mod (XManager) ni yuklab olish:", reply_markup=link_btn("Spotify Mod", "https://xmanagerapp.com/"))
+    await message.answer("Spotify Mod (XManager) ni yuklab olish:", reply_markup=link_btn("XManager Sayti", "https://xmanagerapp.com/"))
 
 @dp.message(F.text == "TikTok Mod 📹")
 async def h_tiktok(message: types.Message):
-    await message.answer("TikTok Mod (Plugin) yuklab olish:", reply_markup=link_btn("TikTok Mod", "https://t.me/tiktokmod_cloud"))
+    await message.answer("TikTok Mod (Plugin) yuklab olish:", reply_markup=link_btn("TikTok Mod Kanal", "https://t.me/tiktokmod_cloud"))
 
 @dp.message(F.text == "InShot Pro ✂️")
 async def h_inshot(message: types.Message):
-    await message.answer("InShot Pro versiyasini yuklab olish:", reply_markup=link_btn("InShot (Play Market)", "https://play.google.com/store/apps/details?id=com.camerasideas.instashot"))
+    await message.answer("InShot yuklab olish:", reply_markup=link_btn("InShot (Play Market)", "https://play.google.com/store/apps/details?id=com.camerasideas.instashot"))
 
 @dp.message(F.text == "VPN Pro versiya 🌐")
 async def h_vpn(message: types.Message):
@@ -154,17 +152,17 @@ async def h_recover(message: types.Message):
 
 @dp.message(F.text == "Mod O'yinlar 🎮")
 async def h_games(message: types.Message):
-    await message.answer("Clash of Clans va boshqa mod o'yinlar sayti:", reply_markup=link_btn("HappyMod", "https://happymod.com/"))
+    await message.answer("Clash of Clans va boshqa mod o'yinlar:", reply_markup=link_btn("HappyMod Sayti", "https://happymod.com/"))
 
 # --- 2-MENYU TUGMALARI ---
 
 @dp.message(F.text == "Montaj ilovasi 👌")
 async def h_gravity(message: types.Message):
-    await message.answer("Gravity (iPhone uchun):", reply_markup=link_btn("Gravity", "https://apps.apple.com/uz/app/gravity-augmented-reality/id1400961806"))
+    await message.answer("Gravity (iPhone uchun):", reply_markup=link_btn("Gravity (App Store)", "https://apps.apple.com/uz/app/gravity-augmented-reality/id1400961806"))
 
 @dp.message(F.text == "Android ilovalar 🧩")
 async def h_android_apps(message: types.Message):
-    await message.answer("ZFont (iPhone Emojilari):", reply_markup=link_btn("zFont", "https://play.google.com/store/apps/details?id=com.htetznaing.zfont2"))
+    await message.answer("ZFont (iPhone Emojilari):", reply_markup=link_btn("zFont (Play Market)", "https://play.google.com/store/apps/details?id=com.htetznaing.zfont2"))
 
 @dp.message(F.text == "Telegramda Pul ishlash 🤩")
 async def h_money(message: types.Message):
@@ -181,7 +179,7 @@ async def h_ai_video(message: types.Message):
 
 @dp.message(F.text.in_({"Android sirli ilovasi 🤫", "O'chgan smsni ko'rish 👀"}))
 async def h_wamr(message: types.Message):
-    await message.answer("WAMR (O'chgan SMSlarni o'qish):", reply_markup=link_btn("WAMR", "https://play.google.com/store/apps/details?id=com.drilens.wamr"))
+    await message.answer("WAMR (O'chgan SMSlarni o'qish):", reply_markup=link_btn("WAMR (Play Market)", "https://play.google.com/store/apps/details?id=com.drilens.wamr"))
 
 @dp.message(F.text == "PUL ISHLASH 🤑")
 async def h_earn_money(message: types.Message):
