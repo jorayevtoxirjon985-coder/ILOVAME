@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # --------------------------------------------------------------------------------
-# 1. SOZLAMALAR (TOKEN)
+# SOZLAMALAR
 # --------------------------------------------------------------------------------
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -21,11 +21,11 @@ dp = Dispatcher()
 logging.basicConfig(level=logging.INFO)
 
 # --------------------------------------------------------------------------------
-# 2. MENYULAR
+# MENYULAR
 # --------------------------------------------------------------------------------
 def main_menu():
     builder = ReplyKeyboardBuilder()
-    builder.button(text="Montaj ilovalari 📹") # Bu tugma endi ishlaydi
+    builder.button(text="Montaj ilovalari 📹") 
     builder.button(text="ChatGPT portret 🌅")
     builder.button(text="Instagram Mod")
     builder.button(text="Spotify Mod 🎵")
@@ -70,7 +70,7 @@ def second_menu():
     return builder.as_markup(resize_keyboard=True)
 
 # --------------------------------------------------------------------------------
-# 3. PROMPTLAR (MATNLAR)
+# PROMPTLAR
 # --------------------------------------------------------------------------------
 portrait_prompts = [
     """Create a realistic behind-the-scenes selfie on a film set inspired by the HBO series "Game of Thrones"...""",
@@ -79,7 +79,16 @@ portrait_prompts = [
 ]
 
 # --------------------------------------------------------------------------------
-# 4. HANDLERS (JAVOBLAR)
+# YORDAMCHI: FAYL ID SINI OLIW UCHUN (Faqat siz uchun)
+# --------------------------------------------------------------------------------
+@dp.message(F.document)
+async def get_file_id_handler(message: types.Message):
+    # Siz botga fayl tashlasangiz, u sizga ID sini qaytaradi
+    file_id = message.document.file_id
+    await message.reply(f"✅ <b>Fayl qabul qilindi!</b>\n\nKodni nusxalab oling va kodga qo'ying:\n<code>{file_id}</code>", parse_mode="HTML")
+
+# --------------------------------------------------------------------------------
+# ASOSIY HANDLERLAR
 # --------------------------------------------------------------------------------
 
 @dp.message(Command("start"))
@@ -95,138 +104,84 @@ async def next_page(message: types.Message):
 async def prev_page(message: types.Message):
     await message.answer("Asosiy menyu:", reply_markup=main_menu())
 
-# --- "MONTAJ ILOVALARI" (1-MENYU) --- 
-# Bu yerda ikkita asosiy ilovani birdan tashlaymiz
+# --- MONTAJ ILOVALARI (CapCut va InShot birdan ketadi) ---
 @dp.message(F.text == "Montaj ilovalari 📹")
 async def send_montage_apps(message: types.Message):
-    await message.answer("Eng zo'r montaj ilovalari tashlanmoqda...")
+    await message.answer("Ilovalar yuklanmoqda... ⏳")
+    
+    # DIQQAT: Pastdagi "BQACAg..." larni o'rniga o'zingiz olgan ID larni qo'ying!
+    
     # 1. CapCut
-    await message.answer_document(document="FILE_ID_CAPCUT", caption="📥 **CapCut Pro** (Android)")
+    try:
+        await message.answer_document(document="FILE_ID_CAPCUT_QUYING", caption="📥 **CapCut Pro** (Android)\nSuv belgisiz va barcha effektlar ochiq.")
+    except:
+        await message.answer("❌ CapCut fayli hali yuklanmagan (ID noto'g'ri).")
+
     # 2. InShot
-    await message.answer_document(document="FILE_ID_INSHOT", caption="📥 **InShot Pro** (Android)")
+    try:
+        await message.answer_document(document="FILE_ID_INSHOT_QUYING", caption="📥 **InShot Pro** (Android)\nReklamasiz to'liq versiya.")
+    except:
+        await message.answer("❌ InShot fayli hali yuklanmagan (ID noto'g'ri).")
 
-# --- "NOMER ANIQLASH" (Androidga fayl, iPhonega ssilka) ---
-@dp.message(F.text == "Nomer aniqlash 🔍")
-async def send_caller_id(message: types.Message):
-    # Android uchun FAYL
-    await message.answer_document(document="FILE_ID_NOMER_ANIQLASH_APK", caption="🤖 **Android uchun: Sync.ME** (Fayl)")
-    # iPhone uchun SSILKA
-    await message.answer("📱 **iPhone uchun:**\nhttps://apps.apple.com/uz/app/sync-me-caller-id-contacts/id340787494")
 
-# --- QOLGAN FAYLLAR (HAMMASI FAYL BO'LIB BORADI) ---
+# --- QOLGAN FAYLLAR ---
 
 @dp.message(F.text == "Instagram Mod")
 async def send_insta(message: types.Message):
-    await message.answer_document(document="FILE_ID_INSTAGRAM_MOD", caption="📥 **Instagram Mod (InstaPro)**")
+    try:
+        await message.answer_document(document="FILE_ID_INSTA_QUYING", caption="📥 **Instagram Mod (InstaPro)**")
+    except:
+        await message.answer("❌ Fayl topilmadi, IDni tekshiring.")
 
 @dp.message(F.text == "Spotify Mod 🎵")
 async def send_spotify(message: types.Message):
-    await message.answer_document(document="FILE_ID_SPOTIFY", caption="📥 **Spotify Premium Mod**")
+    await message.answer_document(document="FILE_ID_SPOTIFY_QUYING", caption="📥 **Spotify Premium Mod**")
 
 @dp.message(F.text == "TikTok Mod 📹")
 async def send_tiktok(message: types.Message):
-    await message.answer_document(document="FILE_ID_TIKTOK", caption="📥 **TikTok Mod (Suv belgisiz)**")
+    await message.answer_document(document="FILE_ID_TIKTOK_QUYING", caption="📥 **TikTok Mod (Suv belgisiz)**")
 
 @dp.message(F.text == "InShot Pro ✂️")
-async def send_inshot(message: types.Message):
-    await message.answer_document(document="FILE_ID_INSHOT", caption="📥 **InShot Pro**")
+async def send_inshot_single(message: types.Message):
+    await message.answer_document(document="FILE_ID_INSHOT_QUYING", caption="📥 **InShot Pro**")
 
 @dp.message(F.text == "VPN Pro versiya 🌐")
 async def send_vpn(message: types.Message):
-    await message.answer_document(document="FILE_ID_VPN", caption="📥 **AdGuard VPN Mod**")
+    await message.answer_document(document="FILE_ID_VPN_QUYING", caption="📥 **AdGuard VPN Mod**")
 
 @dp.message(F.text == "Rasmlarni tiklash ♻️")
 async def send_recovery(message: types.Message):
-    await message.answer_document(document="FILE_ID_DISK_DIGGER", caption="📥 **DiskDigger Pro** (Rasmlarni tiklash)")
+    await message.answer_document(document="FILE_ID_RECOVERY_QUYING", caption="📥 **DiskDigger Pro** (Rasmlarni tiklash)")
 
 @dp.message(F.text == "Mod O'yinlar 🎮")
 async def send_games(message: types.Message):
-    await message.answer_document(document="FILE_ID_CLASH", caption="📥 **Clash of Clans Mod**")
+    await message.answer_document(document="FILE_ID_GAMES_QUYING", caption="📥 **Clash of Clans Mod**")
 
-@dp.message(F.text == "Cap Cut Pro tekin 📱")
-async def send_capcut(message: types.Message):
-    await message.answer_document(document="FILE_ID_CAPCUT", caption="📥 **CapCut Pro**")
-
-@dp.message(F.text == "Minusovka ajratish 🎼")
-async def send_minus(message: types.Message):
-    await message.answer_document(document="FILE_ID_MOISES", caption="📥 **Moises AI** (Minusovka qiluvchi)")
-
-@dp.message(F.text == "Stiker yasash 🧩")
-async def send_sticker_app(message: types.Message):
-    await message.answer_document(document="FILE_ID_STICKER_MAKER", caption="📥 **Sticker Maker**")
+@dp.message(F.text == "Nomer aniqlash 🔍")
+async def send_caller_id(message: types.Message):
+    # Android uchun fayl
+    await message.answer_document(document="FILE_ID_NOMER_QUYING", caption="🤖 **Android uchun: Sync.ME** (Fayl)")
+    # iPhone uchun ssilka
+    await message.answer("📱 **iPhone uchun:**\nhttps://apps.apple.com/uz/app/sync-me-caller-id-contacts/id340787494")
 
 @dp.message(F.text == "Android sirli ilovasi 🤫")
 async def send_secret_app(message: types.Message):
-    await message.answer_document(document="FILE_ID_WAMR", caption="📥 **WAMR** (O'chgan SMSlarni o'qish)")
+    await message.answer_document(document="FILE_ID_WAMR_QUYING", caption="📥 **WAMR** (O'chgan SMSlarni o'qish)")
 
-@dp.message(F.text == "O'chgan smsni ko'rish 👀")
-async def send_wamr_direct(message: types.Message):
-    await message.answer_document(document="FILE_ID_WAMR", caption="📥 **WAMR** (O'chgan SMSlarni ko'rish)")
-
-@dp.message(F.text == "Telefon blok ilovasi 🔒")
-async def send_lock_app(message: types.Message):
-    await message.answer_document(document="FILE_ID_LOCK_APP", caption="📥 **Time Password** (Har daqiqa o'zgaradigan parol)")
-
-@dp.message(F.text == "Telefon Zapis 🔴")
-async def send_call_recorder(message: types.Message):
-    await message.answer_document(document="FILE_ID_CALL_RECORDER", caption="📥 **Call Recorder** (Zapis qilish)")
-
-@dp.message(F.text == "Yolg'on qo'ng'iroq 📞")
-async def send_fake_call(message: types.Message):
-    await message.answer_document(document="FILE_ID_FAKE_CALL", caption="📥 **Fake Call** (Yolg'on qo'ng'iroq)")
-
-@dp.message(F.text == "Reklamasiz Instagram ❗️")
-async def send_instander(message: types.Message):
-    await message.answer_document(document="FILE_ID_INSTANDER", caption="📥 **Instander** (Reklamasiz Instagram)")
-
-@dp.message(F.text == "O'yin uchun ilova 🎮")
-async def send_game_tool(message: types.Message):
-    await message.answer_document(document="FILE_ID_GAME_TOOL", caption="📥 **AirConsole** (Telefonda o'yin o'ynash)")
-
-@dp.message(F.text == "Sharpa Telegram 👻")
-async def send_ghost_telegram(message: types.Message):
-    await message.answer_document(document="FILE_ID_AKA_MESSENGER", caption="📥 **Aka Messenger** (Sharpa rejim)")
-
-@dp.message(F.text == "Android VPN 🌐")
-async def send_android_vpn(message: types.Message):
-    await message.answer_document(document="FILE_ID_VPN", caption="📥 **AdGuard VPN**")
-
-# --- SSILKALAR ---
-# (Fayli yo'q, faqat ssilka bo'lishi shart bo'lganlar)
-
-@dp.message(F.text == "Telegramda Pul ishlash 🤩")
-async def send_money_bot(message: types.Message):
-    await message.answer("<b>GenkiMinerBot:</b>\n👉 <a href='https://t.me/GenkiMinerBot/kapkap?startapp=T2xLOZii'>O'yinni boshlash</a>", parse_mode="HTML")
-
-@dp.message(F.text == "PUL ISHLASH 🤑")
-async def send_money_bot_2(message: types.Message):
-    await message.answer("<b>GenkiMinerBot (USDT ishlash):</b>\n👉 <a href='https://t.me/GenkiMinerBot/kapkap?startapp=T2xLOZii'>Boshlash</a>", parse_mode="HTML")
-
-@dp.message(F.text == "Spamdan chiqish 🚫")
-async def send_spam_info(message: types.Message):
-    await message.answer("<b>Spamdan chiqish:</b>\n@SpamBot ga kirib 'Bu xato' (This is a mistake) tugmasini bosing.", parse_mode="HTML")
-
-@dp.message(F.text == "Bir daqiqalik parol ✳️")
-async def send_temp_mail(message: types.Message):
-    await message.answer("Vaxtinchalik email sayti: https://temp-mail.org/")
-
+# --- MATNLAR VA SSILKALAR ---
 @dp.message(F.text == "ChatGPT portret 🌅")
 async def send_ai_prompt(message: types.Message):
     selected_prompt = random.choice(portrait_prompts)
     await message.answer(f"<b>Prompt nusxalab oling:</b>\n<code>{selected_prompt}</code>", parse_mode="HTML")
 
-@dp.message(F.text == "AI Video 🎥")
-async def send_ai_video_tools(message: types.Message):
-    await message.answer("Rasm: https://gemini.google.com/app\nVideo: https://deevid.ai/", parse_mode="HTML")
-
 @dp.message(F.text == "Montaj ilovasi 👌")
 async def send_gravity(message: types.Message):
-    await message.answer("<b>Ilova faqat iPhone uchun:</b>\n<a href='https://apps.apple.com/uz/app/gravity-augmented-reality/id1400961806'>Gravity - Yuklab olish</a>", parse_mode="HTML")
+    await message.answer("<b>Gravity (iPhone):</b>\n<a href='https://apps.apple.com/uz/app/gravity-augmented-reality/id1400961806'>Yuklab olish</a>", parse_mode="HTML")
 
-# --- QOLGANLAR ---
+# --- Catch-All (Boshqa hamma tugmalar uchun) ---
 @dp.message()
 async def echo_handler(message: types.Message):
-    await message.answer("Tez orada qo'shiladi! 🛠")
+    await message.answer("Bu bo'lim tez orada qo'shiladi! 🛠 Yoki fayl ID si xato kiritilgan.")
 
 # --------------------------------------------------------------------------------
 # BOTNI YURGIZISH
